@@ -24,7 +24,7 @@ class Robot {
         waist: createBoxMesh(70, 26, 42),
   
         neck: createBoxMesh(18, 14, 18),
-        head: createBoxMesh(62, 58, 58),
+        head: createSphereMesh(35, 58, 58),
         visor: createTrapezoidPrismMesh(34, 26, 18, 6),
         eyePanel: createBoxMesh(28, 10, 4),
   
@@ -86,7 +86,7 @@ class Robot {
     }
   
     draw(textures) {
-      let root = M(
+      let root = combineMatrices(
         Mat4.translation(this.position[0], this.position[1], this.position[2]),
         Mat4.rotationY(Math.PI + this.bodyYaw),
         Mat4.scale(0.82, 0.82, 0.82)
@@ -105,13 +105,13 @@ class Robot {
       let torsoM = root;
       drawMesh(this.mesh.torso, torsoM, textures.metal);
   
-      let chestPanelM = M(
+      let chestPanelM = combineMatrices(
         torsoM,
         Mat4.translation(0, -12, 33)
       );
       drawMesh(this.mesh.chestPanel, chestPanelM, textures.screen);
   
-      let waistM = M(
+      let waistM = combineMatrices(
         torsoM,
         Mat4.translation(0, 84, 0)
       );
@@ -119,13 +119,13 @@ class Robot {
     }
   
     drawHead(root, textures) {
-      let neckM = M(
+      let neckM = combineMatrices(
         root,
         Mat4.translation(0, -78, 0)
       );
       drawMesh(this.mesh.neck, neckM, textures.plastic);
   
-      let headM = M(
+      let headM = combineMatrices(
         neckM,
         Mat4.translation(0, -38, 0),
         Mat4.rotationY(this.headYaw),
@@ -133,19 +133,19 @@ class Robot {
       );
       drawMesh(this.mesh.head, headM, textures.metal);
   
-      let visorM = M(
+      let visorM = combineMatrices(
         headM,
         Mat4.translation(0, -4, 32)
       );
       drawMesh(this.mesh.visor, visorM, textures.plastic);
   
-      let eyePanelM = M(
+      let eyePanelM = combineMatrices(
         headM,
         Mat4.translation(0, -4, 36)
       );
       drawMesh(this.mesh.eyePanel, eyePanelM, textures.screen);
   
-      let antennaBaseM = M(
+      let antennaBaseM = combineMatrices(
         headM,
         Mat4.translation(20, -40, 0)
       );
@@ -229,13 +229,13 @@ class Robot {
     }
   
     drawBackCables(root, textures) {
-      let leftCableM = M(
+      let leftCableM = combineMatrices(
         root,
         Mat4.translation(-22, 20, -34)
       );
       drawMesh(this.mesh.cable, leftCableM, textures.plastic);
   
-      let rightCableM = M(
+      let rightCableM = combineMatrices(
         root,
         Mat4.translation(22, 20, -34)
       );

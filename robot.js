@@ -157,33 +157,33 @@ class Robot {
       let shoulderRot = left ? this.leftShoulder : this.rightShoulder;
       let elbowRot = left ? this.leftElbow : this.rightElbow;
     
-      let shoulderBase = M(
+      let shoulderBase = combineMatrices(
         root,
         Mat4.translation(68 * side, -46, 0)
       );
       drawMesh(this.mesh.shoulderPad, shoulderBase, textures.plastic);
     
-      let upperArmM = M(
+      let upperArmM = combineMatrices(
         shoulderBase,
         Mat4.rotationX(shoulderRot),
         Mat4.translation(0, 46, 0)
       );
       drawMesh(this.mesh.upperArm, upperArmM, textures.metal);
     
-      let elbowM = M(
+      let elbowM = combineMatrices(
         upperArmM,
         Mat4.translation(0, 48, 0)
       );
       drawMesh(this.mesh.elbowJoint, elbowM, textures.plastic);
     
-      let forearmM = M(
+      let forearmM = combineMatrices(
         elbowM,
         Mat4.rotationX(elbowRot),
         Mat4.translation(0, 42, 0)
       );
       drawMesh(this.mesh.forearm, forearmM, textures.plastic);
     
-      let handM = M(
+      let handM = combineMatrices(
         forearmM,
         Mat4.translation(0, 42, 0)
       );
@@ -195,32 +195,32 @@ class Robot {
       let hipRot = left ? this.leftHip : this.rightHip;
       let kneeRot = left ? this.leftKnee : this.rightKnee;
     
-      let hipBase = M(
+      let hipBase = combineMatrices(
         root,
         Mat4.translation(26 * side, 72, 0)
       );
     
-      let upperLegM = M(
+      let upperLegM = combineMatrices(
         hipBase,
         Mat4.rotationX(hipRot),
         Mat4.translation(0, 38, 0)
       );
       drawMesh(this.mesh.upperLeg, upperLegM, textures.metal);
     
-      let kneeM = M(
+      let kneeM = combineMatrices(
         upperLegM,
         Mat4.translation(0, 46, 6)
       );
       drawMesh(this.mesh.kneeJoint, kneeM, textures.plastic);
     
-      let lowerLegM = M(
+      let lowerLegM = combineMatrices(
         kneeM,
         Mat4.rotationX(-kneeRot),
         Mat4.translation(0, 42, 0)
       );
       drawMesh(this.mesh.lowerLeg, lowerLegM, textures.plastic);
     
-      let footM = M(
+      let footM = combineMatrices(
         lowerLegM,
         Mat4.translation(0, 32, 18),
         Mat4.rotationX(-0.12)

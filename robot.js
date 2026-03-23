@@ -1,6 +1,6 @@
 class Robot {
     constructor() {
-      this.position = [0, 70, 0];
+      this.position = [0, -30, 0];
       this.bodyYaw = 0;
       this.headYaw = 0;
       this.headPitch = 0;
@@ -35,7 +35,7 @@ class Robot {
         hand: createBoxMesh(22, 18, 20),
   
         upperLeg: createBoxMesh(30, 84, 30),
-        kneeJoint: createBoxMesh(26, 18, 26),
+        kneeJoint: createBoxMesh(32, 22, 32),
         lowerLeg: createBoxMesh(24, 76, 24),
         foot: createTrapezoidPrismMesh(34, 24, 18, 56),
   
@@ -47,32 +47,49 @@ class Robot {
     update() {
       if (this.isWalking) {
         this.walkCycle += 0.09;
-  
+    
         let s = Math.sin(this.walkCycle);
-        let s2 = Math.sin(this.walkCycle + Math.PI);
-  
-        this.leftHip = 0.55 * s;
-        this.rightHip = 0.55 * s2;
-  
-        this.leftShoulder = -0.45 * s;
-        this.rightShoulder = -0.45 * s2;
-  
-        this.leftKnee = Math.max(0, -0.55 * s);
-        this.rightKnee = Math.max(0, -0.55 * s2);
+        let sOpp = Math.sin(this.walkCycle + Math.PI);
+    
+        let leftForward = Math.max(0, s);
+        let rightForward = Math.max(0, sOpp);
+    
+        let leftBack = Math.max(0, -s);
+        let rightBack = Math.max(0, -sOpp);
+    
+        // coxa: sobe mais à frente, recua menos atrás
+        this.leftHip = 0.90 * leftForward - 0.35 * leftBack;
+        this.rightHip = 0.90 * rightForward - 0.35 * rightBack;
+    
+        // braços em oposição
+        this.leftShoulder = -0.55 * sOpp;
+        this.rightShoulder = -0.55 * s;
+    
+        // joelhos
+        this.leftKnee = 0.08 + 0.70 * leftBack * leftBack + 0.12 * leftForward;
+        this.rightKnee = 0.08 + 0.70 * rightBack * rightBack + 0.12 * rightForward;
+    
+        // antebraços
+        this.leftElbow = 0.35 + 0.20 * Math.sin(this.walkCycle * 2);
+        this.rightElbow = 0.35 + 0.20 * Math.sin(this.walkCycle * 2 + Math.PI);
+    
       } else {
-        this.leftHip *= 0.85;
-        this.rightHip *= 0.85;
-        this.leftShoulder *= 0.85;
-        this.rightShoulder *= 0.85;
-        this.leftKnee *= 0.8;
-        this.rightKnee *= 0.8;
+        this.leftHip *= 0.82;
+        this.rightHip *= 0.82;
+        this.leftShoulder *= 0.82;
+        this.rightShoulder *= 0.82;
+        this.leftKnee *= 0.75;
+        this.rightKnee *= 0.75;
+        this.leftElbow *= 0.8;
+        this.rightElbow *= 0.8;
       }
     }
   
     draw(textures) {
       let root = combineMatrices(
         Mat4.translation(this.position[0], this.position[1], this.position[2]),
-        Mat4.rotationY(this.bodyYaw)
+        Mat4.rotationY(Math.PI + this.bodyYaw),
+        Mat4.scale(0.82, 0.82, 0.82)
       );
   
       this.drawTorso(root, textures);
@@ -139,34 +156,34 @@ class Robot {
       let side = left ? -1 : 1;
       let shoulderRot = left ? this.leftShoulder : this.rightShoulder;
       let elbowRot = left ? this.leftElbow : this.rightElbow;
-  
-      let shoulderBase = combineMatrices(
+    
+      let shoulderBase = M(
         root,
         Mat4.translation(68 * side, -46, 0)
       );
       drawMesh(this.mesh.shoulderPad, shoulderBase, textures.plastic);
-  
-      let upperArmM = combineMatrices(
+    
+      let upperArmM = M(
         shoulderBase,
-        Mat4.rotationZ(shoulderRot * side),
+        Mat4.rotationX(shoulderRot),
         Mat4.translation(0, 46, 0)
       );
       drawMesh(this.mesh.upperArm, upperArmM, textures.metal);
-  
-      let elbowM = combineMatrices(
+    
+      let elbowM = M(
         upperArmM,
         Mat4.translation(0, 48, 0)
       );
       drawMesh(this.mesh.elbowJoint, elbowM, textures.plastic);
-  
-      let forearmM = combineMatrices(
+    
+      let forearmM = M(
         elbowM,
-        Mat4.rotationZ(elbowRot * side),
+        Mat4.rotationX(elbowRot),
         Mat4.translation(0, 42, 0)
       );
       drawMesh(this.mesh.forearm, forearmM, textures.plastic);
-  
-      let handM = combineMatrices(
+    
+      let handM = M(
         forearmM,
         Mat4.translation(0, 42, 0)
       );
@@ -177,31 +194,36 @@ class Robot {
       let side = left ? -1 : 1;
       let hipRot = left ? this.leftHip : this.rightHip;
       let kneeRot = left ? this.leftKnee : this.rightKnee;
-  
-      let upperLegM = combineMatrices(
+    
+      let hipBase = M(
         root,
-        Mat4.translation(26 * side, 100, 0),
-        Mat4.rotationZ(hipRot * side),
-        Mat4.translation(0, 42, 0)
+        Mat4.translation(26 * side, 72, 0)
+      );
+    
+      let upperLegM = M(
+        hipBase,
+        Mat4.rotationX(hipRot),
+        Mat4.translation(0, 38, 0)
       );
       drawMesh(this.mesh.upperLeg, upperLegM, textures.metal);
-  
-      let kneeM = combineMatrices(
+    
+      let kneeM = M(
         upperLegM,
-        Mat4.translation(0, 52, 0)
+        Mat4.translation(0, 46, 6)
       );
       drawMesh(this.mesh.kneeJoint, kneeM, textures.plastic);
-  
-      let lowerLegM = combineMatrices(
+    
+      let lowerLegM = M(
         kneeM,
-        Mat4.rotationZ(kneeRot * side),
-        Mat4.translation(0, 46, 0)
+        Mat4.rotationX(-kneeRot),
+        Mat4.translation(0, 42, 0)
       );
       drawMesh(this.mesh.lowerLeg, lowerLegM, textures.plastic);
-  
-      let footM = combineMatrices(
+    
+      let footM = M(
         lowerLegM,
-        Mat4.translation(0, 50, 14)
+        Mat4.translation(0, 32, 18),
+        Mat4.rotationX(-0.12)
       );
       drawMesh(this.mesh.foot, footM, textures.metal);
     }

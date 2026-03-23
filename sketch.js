@@ -17,7 +17,7 @@ function setup() {
 }
 
 function drawGround() {
-  let groundM = M(
+  let groundM = combineMatrices(
     Mat4.translation(0, 220, 0)
   );
   drawMesh(groundMesh, groundM, textures.plastic);

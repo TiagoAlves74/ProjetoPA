@@ -63,12 +63,12 @@ function draw() {
   robot.update();
 
   let camX = robot.position[0] - Math.sin(robot.bodyYaw) * 360;
-  let camY = -40;
+  let camY = -70;
   let camZ = robot.position[2] - Math.cos(robot.bodyYaw) * 360;
 
   camera(
     camX, camY, camZ,
-    robot.position[0], robot.position[1] - 30, robot.position[2],
+    robot.position[0], robot.position[1] + 20, robot.position[2],
     0, 1, 0
   );
 

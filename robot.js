@@ -24,9 +24,9 @@ class Robot {
         waist: createBoxMesh(70, 26, 42),
   
         neck: createBoxMesh(18, 14, 18),
-        head: createSphereMesh(35, 58, 58),
-        visor: createTrapezoidPrismMesh(34, 26, 18, 6),
-        eyePanel: createBoxMesh(28, 10, 4),
+        head: createSphereMesh(40, 58, 58),
+       //visor: createTrapezoidPrismMesh(34, 26, 18, 6),
+        //eyePanel: createBoxMesh(28, 10, 4),
   
         shoulderPad: createTrapezoidPrismMesh(36, 26, 20, 34),
         upperArm: createBoxMesh(24, 72, 24),
@@ -123,17 +123,18 @@ class Robot {
         root,
         Mat4.translation(0, -78, 0)
       );
-      drawMesh(this.mesh.neck, neckM, textures.plastic);
+      drawMesh(this.mesh.neck, neckM, textures.head);
   
       let headM = combineMatrices(
         neckM,
-        Mat4.translation(0, -38, 0),
+        Mat4.translation(0, -45, 0),
         Mat4.rotationY(this.headYaw),
-        Mat4.rotationX(this.headPitch)
+        Mat4.rotationX(this.headPitch),
+        Mat4.scale(0.85, 1.0, 1.0) 
       );
       drawMesh(this.mesh.head, headM, textures.metal);
   
-      let visorM = combineMatrices(
+     /* let visorM = combineMatrices(
         headM,
         Mat4.translation(0, -4, 32)
       );
@@ -143,7 +144,7 @@ class Robot {
         headM,
         Mat4.translation(0, -4, 36)
       );
-      drawMesh(this.mesh.eyePanel, eyePanelM, textures.screen);
+      drawMesh(this.mesh.eyePanel, eyePanelM, textures.screen);*/
   
       let antennaBaseM = combineMatrices(
         headM,

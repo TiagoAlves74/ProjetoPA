@@ -6,6 +6,8 @@ function preload() {
   textures.metal = loadImage("assets/metal.png");
   textures.plastic = loadImage("assets/plastic.png");
   textures.screen = loadImage("assets/screen.png");
+
+  textures.head = loadModel("assets/head.png");
 }
 
 function setup() {

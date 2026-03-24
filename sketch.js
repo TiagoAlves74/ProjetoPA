@@ -7,7 +7,7 @@ function preload() {
   textures.plastic = loadImage("assets/plastic.png");
   textures.screen = loadImage("assets/screen.png");
 
-  textures.head = loadModel("assets/head.png");
+  textures.head = loadImage("assets/head.png");
 }
 
 function setup() {

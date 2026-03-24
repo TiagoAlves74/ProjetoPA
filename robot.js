@@ -18,8 +18,11 @@ class Robot {
       this.walkCycle = 0;
       this.isWalking = false;
   
+      // Tornar o robot mais humano:
+      // 1. Torso com forma de "V" (Trapezóide) em vez de caixa reta.
+      // 2. Articulações e mãos esféricas para suavizar o visual "quadrado".
       this.mesh = {
-        torso: createBoxMesh(100, 140, 60),
+        torso: createTrapezoidPrismMesh(110, 85, 140, 60), // (topW, botW, height, depth) - ombros largos
         chestPanel: createBoxMesh(44, 34, 6),
         waist: createBoxMesh(70, 26, 42),
   
@@ -30,12 +33,12 @@ class Robot {
   
         shoulderPad: createTrapezoidPrismMesh(36, 26, 20, 34),
         upperArm: createBoxMesh(24, 72, 24),
-        elbowJoint: createBoxMesh(22, 20, 22),
+        elbowJoint: createSphereMesh(15, 32, 32), // Esfera em vez de Box
         forearm: createBoxMesh(20, 64, 20),
-        hand: createBoxMesh(22, 18, 20),
+        hand: createSphereMesh(13, 32, 32),       // Esfera (punho) em vez de Box
   
         upperLeg: createBoxMesh(30, 84, 30),
-        kneeJoint: createBoxMesh(32, 22, 32),
+        kneeJoint: createSphereMesh(20, 32, 32),  // Esfera em vez de Box
         lowerLeg: createBoxMesh(24, 76, 24),
         foot: createTrapezoidPrismMesh(34, 24, 18, 56),
   
@@ -123,16 +126,19 @@ class Robot {
         root,
         Mat4.translation(0, -78, 0)
       );
-      drawMesh(this.mesh.neck, neckM, textures.head);
+      drawMesh(this.mesh.neck, neckM, textures.metal);
   
       let headM = combineMatrices(
         neckM,
         Mat4.translation(0, -45, 0),
         Mat4.rotationY(this.headYaw),
         Mat4.rotationX(this.headPitch),
+        Mat4.rotationY(Math.PI / 2 ), 
+        Mat4.rotationX(-Math.PI  ),
+        Mat4.rotationZ(0.5),
         Mat4.scale(0.85, 1.0, 1.0) 
       );
-      drawMesh(this.mesh.head, headM, textures.metal);
+      drawMesh(this.mesh.head, headM, textures.head);
   
      /* let visorM = combineMatrices(
         headM,

@@ -3,7 +3,7 @@ let groundMesh;
 let textures = {};
 
 function preload() {
-  textures.metal = loadImage("assets/metal.png");
+  //textures.metal = loadImage("assets/metal.png");
   textures.plastic = loadImage("assets/plastic.png");
   textures.screen = loadImage("assets/screen.png");
   textures.head = loadImage("assets/head.png");

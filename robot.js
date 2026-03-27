@@ -137,13 +137,9 @@ class Robot {
       Mat4.rotationY(this.headYaw),
       Mat4.rotationX(this.headPitch)
     );
-    drawMesh(this.mesh.head, headM, textures.metal);
+    drawMesh(this.mesh.head, headM, textures.head);
 
-    let visorM = combineMatrices(
-      headM,
-      Mat4.translation(0, -4, 32)
-    );
-    drawMesh(this.mesh.visor, visorM, textures.plastic);
+  
 
     let eyePanelM = combineMatrices(
       headM,

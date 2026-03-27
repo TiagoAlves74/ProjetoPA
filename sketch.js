@@ -16,7 +16,8 @@ function setup() {
   textureMode(NORMAL);
 
   robot = new Robot();
-  groundMesh = createGroundMesh(1400, 12);
+  groundMesh = createGroundMesh(2000, 12);
+  wallMesh = createBoxMesh(2000, 1000, 12);
 }
 
 function drawGround() {
@@ -25,6 +26,45 @@ function drawGround() {
   );
   drawMesh(groundMesh, groundM, textures.groud);
 }
+
+
+function drawWalls() {
+  // Ajusta a altura da parede (y) e a distância do centro (z ou x)
+  let yPos = -100; // Levanta a parede para assentar no chão (ajusta se necessário)
+  let dist = 1000;  // Metade da largura do chão (1400 / 2)
+
+  // Parede Frente
+  let wallFront = combineMatrices(
+    Mat4.translation(0, yPos, -dist),
+    Mat4.rotationZ(Math.PI)
+  );
+  drawMesh(wallMesh, wallFront, textures.wall);
+
+  // Parede Trás
+  let wallBack = combineMatrices(
+    Mat4.translation(0, yPos, dist),
+    Mat4.rotationY(Math.PI),
+    Mat4.rotationZ(Math.PI)
+  );
+  drawMesh(wallMesh, wallBack, textures.wall);
+
+  // Parede Esquerda (rodada 90 graus no eixo Y)
+  let wallLeft = combineMatrices(
+    Mat4.translation(-dist, yPos, 0),
+    Mat4.rotationY(Math.PI / 2),
+    Mat4.rotationZ(Math.PI)
+  );
+  drawMesh(wallMesh, wallLeft, textures.wall);
+
+  // Parede Direita (rodada 90 graus no eixo Y)
+  let wallRight = combineMatrices(
+    Mat4.translation(dist, yPos, 0),
+    Mat4.rotationY(-Math.PI / 2),
+    Mat4.rotationZ(Math.PI)
+  );
+  drawMesh(wallMesh, wallRight, textures.wall);
+}
+
 
 function drawSceneLights() {
   ambientLight(55, 55, 60);
@@ -82,6 +122,7 @@ function draw() {
   shininess(24);
 
   drawGround();
+  drawWalls();
   robot.draw(textures);
 
   drawHUD();

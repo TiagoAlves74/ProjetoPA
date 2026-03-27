@@ -6,8 +6,9 @@ function preload() {
   textures.metal = loadImage("assets/metal.png");
   textures.plastic = loadImage("assets/plastic.png");
   textures.screen = loadImage("assets/screen.png");
-
   textures.head = loadImage("assets/head.png");
+  textures.groud = loadImage("assets/ground.png");
+  textures.wall = loadImage("assets/oilRig.png");
 }
 
 function setup() {
@@ -22,7 +23,7 @@ function drawGround() {
   let groundM = combineMatrices(
     Mat4.translation(0, 220, 0)
   );
-  drawMesh(groundMesh, groundM, textures.plastic);
+  drawMesh(groundMesh, groundM, textures.groud);
 }
 
 function drawSceneLights() {

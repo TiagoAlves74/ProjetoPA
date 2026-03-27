@@ -27,7 +27,7 @@ class Robot {
         waist: createBoxMesh(70, 26, 42),
   
         neck: createBoxMesh(18, 14, 18),
-        head: createSphereMesh(40, 58, 58),
+        head: createSphereMesh(35, 58, 58),
        //visor: createTrapezoidPrismMesh(34, 26, 18, 6),
         //eyePanel: createBoxMesh(28, 10, 4),
   
@@ -48,6 +48,12 @@ class Robot {
     }
   
     update() {
+      // Limitar a posição do robot dentro da sala (Mapa 2000x2000 -> Limites +/- 1000)
+      // Usamos 950 para dar margem ao corpo do robot não atravessar a parede visualmente
+      let limit = 950;
+      this.position[0] = Math.max(-limit, Math.min(limit, this.position[0]));
+      this.position[2] = Math.max(-limit, Math.min(limit, this.position[2]));
+
       if (this.isWalking) {
         this.walkCycle += 0.09;
     

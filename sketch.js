@@ -1,6 +1,7 @@
 let robot;
 let groundMesh;
 let textures = {};
+let cameraYaw = 0;
 
 function preload() {
   //textures.metal = loadImage("assets/metal.png");
@@ -12,8 +13,12 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight, WEBGL);
+  let cnv = createCanvas(windowWidth, windowHeight, WEBGL);
   textureMode(NORMAL);
+
+  cnv.mousePressed(() => {
+    requestPointerLock();
+  });
 
   robot = new Robot();
   groundMesh = createGroundMesh(2000, 12);
@@ -105,13 +110,21 @@ function draw() {
   handleRobotInput(robot);
   robot.update();
 
-  let camX = robot.position[0] - Math.sin(robot.bodyYaw) * 360;
-  let camY = -70;
-  let camZ = robot.position[2] - Math.cos(robot.bodyYaw) * 360;
+  let camDistance = 360;
+  let camHeight = -70;
+  let lookDistance = 120;
+
+  let camX = robot.position[0] - Math.sin(cameraYaw) * camDistance;
+  let camY = camHeight;
+  let camZ = robot.position[2] - Math.cos(cameraYaw) * camDistance;
+
+  let lookX = robot.position[0] - Math.sin(cameraYaw) * lookDistance;
+  let lookY = robot.position[1] + 20;
+  let lookZ = robot.position[2] - Math.cos(cameraYaw) * lookDistance;
 
   camera(
     camX, camY, camZ,
-    robot.position[0], robot.position[1] + 20, robot.position[2],
+    lookX, lookY, lookZ,
     0, 1, 0
   );
 
@@ -136,7 +149,7 @@ function drawHUD() {
   fill(255);
   textSize(16);
   textAlign(LEFT, TOP);
-  text("W/S mover | A/D rodar corpo | Setas cabeça | Q/E cotovelo esq. | Z/C cotovelo dir.", 20 - width / 2, 20 - height / 2);
+  text("WASD mover | Setas rodar câmara | J/L cabeça esq./dir. | I/K cabeça cima/baixo | Q/E cotovelo esq. | Z/C cotovelo dir.", 20 - width / 2, 20 - height / 2);
 }
 
 function windowResized() {

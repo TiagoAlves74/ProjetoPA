@@ -19,24 +19,29 @@ class Robot {
     this.isWalking = false;
 
     this.mesh = {
-      torso: createBoxMesh(100, 140, 60),
+      upperTorso: createTrapezoidPrismMesh(70, 95, 140, 50), 
+      // Prisma retangular para a zona abdominal
+      lowerTorso: createBoxMesh(80, 60, 50),
       chestPanel: createBoxMesh(44, 34, 6),
 
       waist: createBoxMesh(42, 34, 34),
       thighCoverLeft: createBoxMesh(30, 60, 20),
       thighCoverRight: createBoxMesh(30, 60, 20),
 
-      neck: createBoxMesh(18, 14, 18),
-      head: createSphereMesh(35, 58, 58),
+      neck: createCylinderMesh(16,14,14),
+      head: createEllipsoidMesh(30, 35.5, 28, 32, 32),
+      faceMask: createHalfSphereMesh(35, 32, 32),
       visor: createTrapezoidPrismMesh(34, 26, 18, 6),
       eyePanel: createBoxMesh(28, 10, 4),
 
       shoulderPad: createTrapezoidPrismMesh(36, 26, 20, 34),
-      upperArm: createBoxMesh(24, 72, 24),
-      elbowJoint: createBoxMesh(22, 20, 22),
-      forearm: createBoxMesh(20, 64, 20),
+      shoulderJoint: createSphereMesh(14, 16, 16), // Rótula do ombro
 
-      handPalm: createBoxMesh(24, 16, 18),
+      upperArm: createCylinderMesh(10, 12, 72), 
+      elbowJoint: createSphereMesh(10, 16, 16), // Rótula do cotovelo
+      forearm: createCylinderMesh(8, 10, 64),
+
+      handPalm: createBoxMesh(10, 16, 18),
 
       fingerProx: createBoxMesh(3.2, 12, 5),
       fingerMid: createBoxMesh(2.8, 10, 4),
@@ -45,12 +50,15 @@ class Robot {
       thumbProx: createBoxMesh(4.5, 10, 5),
       thumbDist: createBoxMesh(4, 8, 4.5),
 
-      upperLeg: createBoxMesh(30, 84, 30),
-      kneeJoint: createBoxMesh(32, 22, 32),
-      lowerLeg: createBoxMesh(24, 76, 24),
+      hipJoint: createSphereMesh(18, 16, 16), // Rótula da anca
+
+      upperLeg: createCylinderMesh(14, 11, 100), 
+      kneeJoint: createSphereMesh(10, 16, 16), // Rótula do joelho
+
+      lowerLeg: createCylinderMesh(14, 9, 110),
       foot: createTrapezoidPrismMesh(34, 24, 18, 56),
 
-      antenna: createBoxMesh(6, 28, 6),
+
       cable: createCableMesh(38, 6, 6)
     };
   }
@@ -92,6 +100,7 @@ class Robot {
   }
 
   draw(textures) {
+    push();
     let root = combineMatrices(
       Mat4.translation(this.position[0], this.position[1], this.position[2]),
       Mat4.rotationY(Math.PI + this.bodyYaw),
@@ -104,91 +113,129 @@ class Robot {
     this.drawArm(root, textures, false);
     this.drawLeg(root, textures, true);
     this.drawLeg(root, textures, false);
-    this.drawBackCables(root, textures);
+    //this.drawBackCables(root, textures);
+    pop();
   }
 
   drawTorso(root, textures) {
-    let torsoM = root;
-    drawMesh(this.mesh.torso, torsoM, textures.metal);
 
-    let chestPanelM = combineMatrices(
-      torsoM,
-      Mat4.translation(0, -12, 33)
+
+    setScreenMaterial();
+    let upperTorsoM = combineMatrices(
+      root,
+      Mat4.translation(0, 0, 0) // Sobe para encaixar no pescoço
     );
-    drawMesh(this.mesh.chestPanel, chestPanelM, textures.screen);
+    // Nota: Usa textures.body se tiveres a textura da bandeira aplicada
+    drawMesh(this.mesh.upperTorso, upperTorsoM, textures.american);
 
+    
+    
+
+    setMetalMaterial();
     let waistM = combineMatrices(
-      torsoM,
+      root,
       Mat4.translation(0, 92, 0)
     );
-    drawMesh(this.mesh.waist, waistM, textures.plastic);
+    drawMesh(this.mesh.waist, waistM, textures.americanLegs);
+
   }
 
   drawHead(root, textures) {
+
+    setPlasticMaterial();
     let neckM = combineMatrices(
       root,
       Mat4.translation(0, -78, 0)
     );
-    drawMesh(this.mesh.neck, neckM, textures.plastic);
+    drawMesh(this.mesh.neck, neckM, textures.skin);
 
-    let headM = combineMatrices(
+
+    let headBaseM = combineMatrices(
       neckM,
       Mat4.translation(0, -38, 0),
       Mat4.rotationY(this.headYaw),
-      Mat4.rotationX(this.headPitch)
+      Mat4.rotationX(this.headPitch),
+      
     );
-    drawMesh(this.mesh.head, headM, textures.head);
+
+
+    drawMesh(this.mesh.head, headBaseM, textures.skin); 
+
+
+    let faceM = combineMatrices(
+      headBaseM,
+      Mat4.translation(0, 0, -2),
+      Mat4.rotationX(Math.PI), 
+      Mat4.rotationX(-0.20),    
+      Mat4.rotationY(-Math.PI)     
+    );
+
+    drawMesh(this.mesh.faceMask, faceM, textures.head);
 
   
 
-    let eyePanelM = combineMatrices(
-      headM,
-      Mat4.translation(0, -4, 36)
-    );
-    drawMesh(this.mesh.eyePanel, eyePanelM, textures.screen);
+    
 
-    let antennaBaseM = combineMatrices(
-      headM,
-      Mat4.translation(20, -40, 0)
-    );
-    drawMesh(this.mesh.antenna, antennaBaseM, textures.plastic);
+
   }
 
   drawArm(root, textures, left) {
+
+    setMetalMaterial();
     let side = left ? -1 : 1;
     let shoulderRot = left ? this.leftShoulder : this.rightShoulder;
     let elbowRot = left ? this.leftElbow : this.rightElbow;
 
+    // 1. Base do ombro (Alinhada com o pescoço e semi-embutida no torso)
     let shoulderBase = combineMatrices(
       root,
-      Mat4.translation(68 * side, -46, 0)
+      Mat4.translation(58 * side, -60, 0) // Movido para cima e para dentro
     );
-    drawMesh(this.mesh.shoulderPad, shoulderBase, textures.plastic);
+
+    // Ombreira (Subida ligeiramente para cobrir o topo da junta de forma natural)
+    /*let shoulderPadM = combineMatrices(
+      shoulderBase,
+      Mat4.translation(0, -16, 0)
+    );
+    drawMesh(this.mesh.shoulderPad, shoulderPadM, textures.plastic);*/
+
+
+    let shoulderJointM = combineMatrices(
+      shoulderBase,
+      Mat4.rotationX(-shoulderRot)
+    );
+    drawMesh(this.mesh.shoulderJoint, shoulderJointM, textures.americanArms);
+
 
     let upperArmM = combineMatrices(
-      shoulderBase,
-      Mat4.rotationX(-shoulderRot),
+      shoulderJointM,
       Mat4.translation(0, 46, 0)
     );
-    drawMesh(this.mesh.upperArm, upperArmM, textures.metal);
+    drawMesh(this.mesh.upperArm, upperArmM, textures.americanArms);
 
+    // 4. Esfera da junta do cotovelo
     let elbowM = combineMatrices(
       upperArmM,
-      Mat4.translation(0, 48, 0)
+      Mat4.translation(0, 36, 0) 
     );
-    drawMesh(this.mesh.elbowJoint, elbowM, textures.plastic);
+    drawMesh(this.mesh.elbowJoint, elbowM, textures.americanArms);
+
 
     let forearmM = combineMatrices(
       elbowM,
       Mat4.rotationX(elbowRot),
-      Mat4.translation(0, 42, 0)
+      Mat4.translation(0, 32, 0) 
     );
-    drawMesh(this.mesh.forearm, forearmM, textures.plastic);
+    drawMesh(this.mesh.forearm, forearmM, textures.americanArms);
+
 
     this.drawHand(forearmM, textures, left);
+
   }
 
   drawHand(forearmM, textures, left) {
+
+    setPlasticMaterial();
     let side = left ? -1 : 1;
   
     let palmM = combineMatrices(
@@ -198,7 +245,7 @@ class Robot {
       Mat4.rotationZ(side * 0.10),
       Mat4.rotationX(0.15)
     );
-    drawMesh(this.mesh.handPalm, palmM, textures.metal);
+    drawMesh(this.mesh.handPalm, palmM, textures.skin);
   
     let fingerBaseY = 9;
     let fingerBaseZ = [-7, -2.5, 2.5, 7];
@@ -232,7 +279,7 @@ class Robot {
       Mat4.rotationX(0.02),
       Mat4.translation(0, 4, 0)
     );
-    drawMesh(this.mesh.thumbProx, thumbProxM, textures.plastic);
+    drawMesh(this.mesh.thumbProx, thumbProxM, textures.skin);
     
     let thumbDistM = combineMatrices(
       thumbProxM,
@@ -241,10 +288,13 @@ class Robot {
       Mat4.rotationZ(0.08 * side),
       Mat4.translation(0, 2.8, 0)
     );
-    drawMesh(this.mesh.thumbDist, thumbDistM, textures.plastic);
+    drawMesh(this.mesh.thumbDist, thumbDistM, textures.skin);
+
   }
 
   drawFinger(palmM, textures, x, y, z, baseCurl, side) {
+
+    setPlasticMaterial();
     let curlSign = side;
   
     // falange proximal
@@ -254,7 +304,7 @@ class Robot {
       Mat4.rotationZ(curlSign * baseCurl),
       Mat4.translation(0, 6, 0)
     );
-    drawMesh(this.mesh.fingerProx, proxM, textures.plastic);
+    drawMesh(this.mesh.fingerProx, proxM, textures.skin);
   
     // falange média
     let midM = combineMatrices(
@@ -263,7 +313,7 @@ class Robot {
       Mat4.rotationZ(curlSign * baseCurl * 2.5),
       Mat4.translation(0, 5, 0)
     );
-    drawMesh(this.mesh.fingerMid, midM, textures.plastic);
+    drawMesh(this.mesh.fingerMid, midM, textures.skin);
   
     // falange distal
     let distM = combineMatrices(
@@ -272,56 +322,60 @@ class Robot {
       Mat4.rotationZ(curlSign * baseCurl * 2.5),
       Mat4.translation(0, 4, 0)
     );
-    drawMesh(this.mesh.fingerDist, distM, textures.plastic);
+    drawMesh(this.mesh.fingerDist, distM, textures.skin);
+
   }
 
   drawLeg(root, textures, left) {
+
+    setMetalMaterial();
     let side = left ? -1 : 1;
     let hipRot = left ? this.leftHip : this.rightHip;
     let kneeRot = left ? this.leftKnee : this.rightKnee;
 
+    // 1. Base da anca
     let hipBase = combineMatrices(
       root,
       Mat4.translation(26 * side, 72, 0)
     );
 
-    let upperLegM = combineMatrices(
+    // 2. Esfera da junta da anca (Roda com a perna)
+    let hipJointM = combineMatrices(
       hipBase,
-      Mat4.rotationX(hipRot),
-      Mat4.translation(0, 38, 0)
+      Mat4.rotationX(hipRot)
     );
+    drawMesh(this.mesh.hipJoint, hipJointM, textures.americanLegs);
 
-    let thighCoverM = combineMatrices(
-      upperLegM,
-      Mat4.translation(0, -24, 8)
+    // 3. Cilindro da Coxa
+    let upperLegM = combineMatrices(
+      hipJointM,
+      Mat4.translation(0, 60, 0) // Metade da altura da coxa (84/2)
     );
-    drawMesh(
-      left ? this.mesh.thighCoverLeft : this.mesh.thighCoverRight,
-      thighCoverM,
-      textures.plastic
-    );
+    drawMesh(this.mesh.upperLeg, upperLegM, textures.americanLegs);
 
-    drawMesh(this.mesh.upperLeg, upperLegM, textures.metal);
-
+    // 4. Esfera do Joelho
     let kneeM = combineMatrices(
       upperLegM,
-      Mat4.translation(0, 46, 6)
+      Mat4.translation(0, 60, 0)
     );
-    drawMesh(this.mesh.kneeJoint, kneeM, textures.plastic);
+    drawMesh(this.mesh.kneeJoint, kneeM, textures.americanLegs);
 
+    // 5. Cilindro da Canela (Roda a partir do joelho)
     let lowerLegM = combineMatrices(
       kneeM,
       Mat4.rotationX(-kneeRot),
-      Mat4.translation(0, 42, 0)
+      Mat4.translation(0, 55, 0) // Metade da altura da canela (76/2)
     );
-    drawMesh(this.mesh.lowerLeg, lowerLegM, textures.plastic);
+    drawMesh(this.mesh.lowerLeg, lowerLegM, textures.americanLegs);
 
+    // 6. Pé
     let footM = combineMatrices(
       lowerLegM,
-      Mat4.translation(0, 32, 18),
+      Mat4.translation(0, 38, 18),
       Mat4.rotationX(-0.12)
     );
-    drawMesh(this.mesh.foot, footM, textures.metal);
+    drawMesh(this.mesh.foot, footM, textures.plastic);
+
   }
 
   drawBackCables(root, textures) {

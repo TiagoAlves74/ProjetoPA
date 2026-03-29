@@ -196,6 +196,136 @@ return mesh;
 }
 
 
+// meia esfera para fazer a parte da cabeca 
+
+function createHalfSphereMesh(radius = 1, latBands = 16, lonBands = 16) {
+  let mesh = createEmptyMesh();
+
+  for (let latNumber = 0; latNumber < latBands; latNumber++) {
+    for (let lonNumber = 0; lonNumber < lonBands; lonNumber++) {
+      
+      let theta1 = (latNumber * Math.PI) / latBands;
+      let theta2 = ((latNumber + 1) * Math.PI) / latBands;
+
+
+      let phi1 = (lonNumber * Math.PI) / lonBands;
+      let phi2 = ((lonNumber + 1) * Math.PI) / lonBands;
+
+      let getVertex = (theta, phi, lat, lon) => {
+        let x = radius * Math.sin(theta) * Math.cos(phi);
+        let y = radius * Math.cos(theta);
+        let z = radius * Math.sin(theta) * Math.sin(phi);
+        
+
+        let u = 1 - (lon / lonBands); 
+        let v = lat / latBands;
+        return { pos: [x, y, z], uv: [u, v] };
+      };
+
+      let p1 = getVertex(theta1, phi1, latNumber, lonNumber);         
+      let p2 = getVertex(theta1, phi2, latNumber, lonNumber + 1);     
+      let p3 = getVertex(theta2, phi1, latNumber + 1, lonNumber);     
+      let p4 = getVertex(theta2, phi2, latNumber + 1, lonNumber + 1); 
+
+      addTriangle(mesh, p1.pos, p3.pos, p2.pos, p1.uv, p3.uv, p2.uv);
+      addTriangle(mesh, p2.pos, p3.pos, p4.pos, p2.uv, p3.uv, p4.uv);
+    }
+  }
+
+  return mesh;
+}
+
+
+// funcao que permite criar cilindros com diferentes raios no topo e na base, o que ajuda no realismo do robot
+function createCylinderMesh(radiusTop, radiusBottom, height, radialSegments = 16) {
+  let mesh = createEmptyMesh();
+  let halfHeight = height / 2;
+
+  for (let i = 0; i < radialSegments; i++) {
+    let u1 = i / radialSegments;
+    let u2 = (i + 1) / radialSegments;
+
+    let theta1 = u1 * 2 * Math.PI;
+    let theta2 = u2 * 2 * Math.PI;
+
+    // Coordenadas do topo
+    let x1Top = radiusTop * Math.sin(theta1);
+    let z1Top = radiusTop * Math.cos(theta1);
+    let x2Top = radiusTop * Math.sin(theta2);
+    let z2Top = radiusTop * Math.cos(theta2);
+
+    // Coordenadas da base
+    let x1Bot = radiusBottom * Math.sin(theta1);
+    let z1Bot = radiusBottom * Math.cos(theta1);
+    let x2Bot = radiusBottom * Math.sin(theta2);
+    let z2Bot = radiusBottom * Math.cos(theta2);
+
+    let p1 = [x1Top, halfHeight, z1Top]; // Topo esquerdo
+    let p2 = [x2Top, halfHeight, z2Top]; // Topo direito
+    let p3 = [x1Bot, -halfHeight, z1Bot]; // Base esquerda
+    let p4 = [x2Bot, -halfHeight, z2Bot]; // Base direita
+
+    // Lados do cilindro
+    addTriangle(mesh, p1, p3, p2, [u1, 0], [u1, 1], [u2, 0]);
+    addTriangle(mesh, p2, p3, p4, [u2, 0], [u1, 1], [u2, 1]);
+
+    // Tampa superior
+    addTriangle(
+      mesh, 
+      [0, halfHeight, 0], p2, p1, 
+      [0.5, 0.5], 
+      [x2Top/radiusTop*0.5+0.5, z2Top/radiusTop*0.5+0.5], 
+      [x1Top/radiusTop*0.5+0.5, z1Top/radiusTop*0.5+0.5]
+    );
+
+    // Tampa inferior
+    addTriangle(
+      mesh, 
+      [0, -halfHeight, 0], p3, p4, 
+      [0.5, 0.5], 
+      [x1Bot/radiusBottom*0.5+0.5, z1Bot/radiusBottom*0.5+0.5], 
+      [x2Bot/radiusBottom*0.5+0.5, z2Bot/radiusBottom*0.5+0.5]
+    );
+  }
+  return mesh;
+}
+
+
+// funcao para criar uma eplipse para a cara 
+function createEllipsoidMesh(radiusX, radiusY, radiusZ, latBands = 16, lonBands = 16) {
+  let mesh = createEmptyMesh();
+
+  for (let latNumber = 0; latNumber < latBands; latNumber++) {
+    for (let lonNumber = 0; lonNumber < lonBands; lonNumber++) {
+      
+      let theta1 = (latNumber * Math.PI) / latBands;
+      let theta2 = ((latNumber + 1) * Math.PI) / latBands;
+
+      let phi1 = (lonNumber * 2 * Math.PI) / lonBands;
+      let phi2 = ((lonNumber + 1) * 2 * Math.PI) / lonBands;
+
+      let getVertex = (theta, phi, lat, lon) => {
+        // Multiplicamos cada eixo pelo seu raio específico
+        let x = radiusX * Math.sin(theta) * Math.cos(phi);
+        let y = radiusY * Math.cos(theta);
+        let z = radiusZ * Math.sin(theta) * Math.sin(phi);
+        let u = 1 - (lon / lonBands); 
+        let v = lat / latBands;
+        return { pos: [x, y, z], uv: [u, v] };
+      };
+
+      let p1 = getVertex(theta1, phi1, latNumber, lonNumber);         
+      let p2 = getVertex(theta1, phi2, latNumber, lonNumber + 1);     
+      let p3 = getVertex(theta2, phi1, latNumber + 1, lonNumber);     
+      let p4 = getVertex(theta2, phi2, latNumber + 1, lonNumber + 1); 
+
+      addTriangle(mesh, p1.pos, p3.pos, p2.pos, p1.uv, p3.uv, p2.uv);
+      addTriangle(mesh, p2.pos, p3.pos, p4.pos, p2.uv, p3.uv, p4.uv);
+    }
+  }
+
+  return mesh;
+}
 
 function createCableMesh(length = 40, thickness = 6, depth = 6) {
   return createBoxMesh(thickness, length, depth);
@@ -204,6 +334,9 @@ function createCableMesh(length = 40, thickness = 6, depth = 6) {
 function createGroundMesh(size = 1200, thickness = 12) {
   return createBoxMesh(size, thickness, size);
 }
+
+
+
 
 
 
